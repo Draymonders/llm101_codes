@@ -7,7 +7,7 @@ import faiss
 import streamlit as st
 
 # Silicon Flow API配置
-SILICON_FLOW_API_KEY = "Bearer sk-fosjotncdjmdyrtscxlfxufqlacaslflxwkrpjtpzbrfzhdk"
+SILICON_FLOW_API_KEY = ""  # 请替换为你的API密钥
 MODEL = "BAAI/bge-m3"  # 查看模型信息 https://cloud.siliconflow.cn/models
 
 def get_embedding(texts, max_retries=2, sleep_time=2):
