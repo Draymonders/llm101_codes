@@ -21,13 +21,14 @@ LABEL_MAP = {
 
 
 class NewsDataset(Dataset):
-    def __init__(self, filename, tokenizer, max_len=128):
+    def __init__(self, filename, tokenizer, max_len=128, toy=True):
         self.data = []
         with open(filename, "r", encoding="utf-8") as f:
             for line in f:
                 item_id, cid, cname, title, keywords = line.strip().split("_!_")
                 self.data.append({"title": title, "label": LABEL_MAP[cid]})
-
+            if toy:
+                self.data = self.data[:100*len(LABEL_MAP)]
         self.tokenizer = tokenizer
         self.max_len = max_len
 

@@ -214,11 +214,10 @@ def evaluate(model, data_loader, criterion, device):
     return total_loss / len(data_loader), correct / total
 
 
-def main():
-    args = get_args()
-    set_seed(args.seed)
+def dataloader(args):
     tokenizer = BertTokenizer.from_pretrained(args.model)
-    dataset = NewsDataset(args.data_path, tokenizer, args.max_len)
+    dataset = NewsDataset(args.data_path, tokenizer, args.max_len, args.toy)
+    print("dataset done")
 
     # split training set, validation set and test set (ratio 0.7:0.15:0.15)
     total_size = len(dataset)
@@ -229,10 +228,16 @@ def main():
     train_dataset, val_dataset, test_dataset = random_split(
         dataset, [train_size, val_size, test_size]
     )
-
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=args.batch_size)
     test_loader = DataLoader(test_dataset, batch_size=args.batch_size)
+    return train_loader, val_loader, test_loader
+
+def train():
+    args = get_args()
+    set_seed(args.seed)
+    # load data
+    train_loader, val_loader, test_loader = dataloader(args)
 
     # create model
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -269,11 +274,23 @@ def main():
 
     # save best model
     torch.save(best_model_state, "best_news_classifier.pth")
+
+def visualization():
+    args = get_args()
+    set_seed(args.seed)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # load data
+    train_loader, val_loader, test_loader = dataloader(args)
+    model = NewsClassifier(args.n_classes, args.model).to(device)
+    model.load_state_dict(torch.load("best_news_classifier.pth"))
+
     # text embeddings visualization
     print("\nVisualizing analysis...")
-    visualize_embeddings(model, test_loader, device, method="tsne")
+    # visualize_embeddings(model, test_loader, device, method="tsne")
     visualize_embeddings(model, test_loader, device, method="umap")
 
 
 if __name__ == "__main__":
-    main()
+    # python main.py --model=bert-base-chinese --batch_size=64 --learning_rate=0.01 --toy
+    train()
+    visualization()
